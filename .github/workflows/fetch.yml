@@ -1,9 +1,9 @@
 name: Fetch 539 Latest 100
 
 on:
+  workflow_dispatch:
   schedule:
-    - cron: '0 15 * * *' # 每日 23:00 (台北時間)
-  workflow_dispatch:     # ✅ 加這行可以手動執行
+    - cron: '0 15 * * *'  # 台北時間每日23:00
 
 permissions:
   contents: write
@@ -27,7 +27,7 @@ jobs:
       - name: Run fetch539 script
         run: python fetch539.py
 
-      - name: Commit changes
+      - name: Commit updated last100.txt
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
