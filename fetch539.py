@@ -1,20 +1,33 @@
 import requests
 from bs4 import BeautifulSoup
 
-url = "https://2019.biga.com.tw/SERVICE/539%E9%96%8B%E7%8D%8E%E5%96%AE%E7%AC%AC1%E9%A0%81"
-res = requests.get(url)
-res.encoding = "utf-8"
+def fetch_539_latest_100():
+    try:
+        url = "https://2019.biga.com.tw/SERVICE/539%E9%96%8B%E7%8D%8E%E5%96%AE%E7%AC%AC1%E9%A0%81"
+        response = requests.get(url)
+        response.encoding = 'utf-8'
 
-soup = BeautifulSoup(res.text, "html.parser")
-rows = soup.find_all("tr")
+        soup = BeautifulSoup(response.text, "html.parser")
+        rows = soup.find_all("tr")
 
-results = []
-for row in rows:
-    cols = row.find_all("div", class_=["f12", "xno"])
-    if len(cols) == 8:
-        _, week, period, n1, n2, n3, n4, n5 = [c.text.strip() for c in cols]
-        results.append(f"{period},{n1},{n2},{n3},{n4},{n5}")
+        output_lines = []
+        for row in rows:
+            cols = row.find_all("div", class_="xno")
+            if len(cols) == 8:
+                date = cols[0].text.strip()
+                weekday = cols[1].text.strip()
+                draw = cols[2].text.strip()
+                nums = [col.text.strip() for col in cols[3:]]
+                output_lines.append(f"{draw} {date} {weekday} {' '.join(nums)}")
 
-with open("last100.txt", "w", encoding="utf-8") as f:
-    for line in results[:100]:
-        f.write(line + "\n")
+        output = "\n".join(output_lines[:100])
+        with open("last100.txt", "w", encoding="utf-8") as f:
+            f.write(output)
+
+        print("[✅] Successfully wrote latest 100 draws to last100.txt")
+
+    except Exception as e:
+        print(f"[❌] Error occurred: {e}")
+
+if __name__ == "__main__":
+    fetch_539_latest_100()
