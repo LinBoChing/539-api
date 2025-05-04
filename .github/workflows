@@ -2,7 +2,7 @@ name: Fetch 539 Latest 100
 
 on:
   schedule:
-    - cron: '0 15 * * *'  # 每天台灣時間23:00（UTC+8 → UTC 15:00）
+    - cron: '0 15 * * *'  # 每日 23:00 (台北時間) 執行
   workflow_dispatch:
 
 jobs:
@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,15 +21,15 @@ jobs:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: pip install requests beautifulsoup4
+        run: pip install beautifulsoup4 requests
 
-      - name: Run fetch539
+      - name: Run fetch539 script
         run: python fetch539.py
 
-      - name: Commit and push
+      - name: Commit changes
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add last100.txt
           git commit -m "Auto update last100.txt"
           git push
