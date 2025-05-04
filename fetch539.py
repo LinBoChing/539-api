@@ -5,29 +5,28 @@ def fetch_539_latest_100():
     try:
         url = "https://2019.biga.com.tw/SERVICE/539%E9%96%8B%E7%8D%8E%E5%96%AE%E7%AC%AC1%E9%A0%81"
         response = requests.get(url)
-        response.encoding = 'utf-8'
+        response.encoding = "utf-8"
 
         soup = BeautifulSoup(response.text, "html.parser")
-        rows = soup.find_all("tr")
+        rows = soup.select("tr")
 
-        output_lines = []
+        result = []
         for row in rows:
             cols = row.find_all("div", class_="xno")
             if len(cols) == 8:
                 date = cols[0].text.strip()
-                weekday = cols[1].text.strip()
-                draw = cols[2].text.strip()
-                nums = [col.text.strip() for col in cols[3:]]
-                output_lines.append(f"{draw} {date} {weekday} {' '.join(nums)}")
+                week = cols[1].text.strip()
+                round_no = cols[2].text.strip()
+                numbers = [c.text.strip().zfill(2) for c in cols[3:]]
+                result.append(f"{round_no} {date} {week} {' '.join(numbers)}")
 
-        output = "\n".join(output_lines[:100])
-        with open("./last100.txt", "w", encoding="utf-8") as f:
-            f.write(output)
+        with open("last100.txt", "w", encoding="utf-8") as f:
+            f.write("\n".join(result[:100]))
 
-        print("[✅] Successfully wrote latest 100 draws to last100.txt")
+        print("[✅] 成功寫入 last100.txt")
 
     except Exception as e:
-        print(f"[❌] Error occurred: {e}")
+        print(f"[❌] 錯誤：{e}")
 
 if __name__ == "__main__":
     fetch_539_latest_100()
