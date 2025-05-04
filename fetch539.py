@@ -3,31 +3,35 @@ from bs4 import BeautifulSoup
 
 def fetch_539_latest_100():
     try:
-        url = "https://www.pilio.idv.tw/lto539/listbbk.asp"
+        url = "https://2019.biga.com.tw/SERVICE/539%E9%96%8B%E7%8D%8E%E5%96%AE%E7%AC%AC1%E9%A0%81"
         response = requests.get(url)
-        response.encoding = "utf-8"
+        response.encoding = 'utf-8'
         soup = BeautifulSoup(response.text, "html.parser")
+        
+        # 印出前1000個字元供除錯
+        print("HTML內容預覽：", response.text[:1000])
 
-        table = soup.find("table")
-        rows = table.find_all("tr")[1:]  # skip header
-        result = []
+        rows = soup.find_all("tr")
+        output_lines = []
 
-        for row in rows[:100]:
-            cols = row.find_all("td")
-            if len(cols) >= 9:
-                draw = cols[0].text.strip()
-                date = cols[1].text.strip()
-                week = cols[2].text.strip()
-                numbers = [cols[i].text.strip().zfill(2) for i in range(3, 8)]
-                result.append(f"{draw} {date} {week} {' '.join(numbers)}")
+        for row in rows:
+            cols = row.find_all("div", class_="xno")
+            if len(cols) == 8:
+                date = cols[0].text.strip()
+                weekday = cols[1].text.strip()
+                draw = cols[2].text.strip()
+                nums = [col.text.strip() for col in cols[3:]]
+                output_lines.append(f"{draw} {date} {weekday} {' '.join(nums)}")
 
+        output = "\n".join(output_lines[:100])
         with open("last100.txt", "w", encoding="utf-8") as f:
-            f.write("\n".join(result))
+            f.write(output)
 
-        print("[✅] last100.txt 寫入完成")
+        print("[✅] Successfully wrote latest 100 draws to last100.txt")
+        print(f"[📦] 共抓到 {len(output_lines)} 筆資料")
 
     except Exception as e:
-        print(f"[❌] 錯誤: {e}")
+        print(f"[❌] Error occurred: {e}")
 
 if __name__ == "__main__":
     fetch_539_latest_100()
