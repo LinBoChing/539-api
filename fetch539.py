@@ -9,10 +9,10 @@ def fetch_539_latest_100():
         soup = BeautifulSoup(response.text, "html.parser")
 
         table = soup.find("table")
-        rows = table.find_all("tr")[1:]  # skip header row
+        rows = table.find_all("tr")[1:]  # skip header
         result = []
 
-        for row in rows[:100]:  # 最多抓100期
+        for row in rows[:100]:
             cols = row.find_all("td")
             if len(cols) >= 9:
                 draw = cols[0].text.strip()
@@ -24,10 +24,10 @@ def fetch_539_latest_100():
         with open("last100.txt", "w", encoding="utf-8") as f:
             f.write("\n".join(result))
 
-        print("[✅] 已成功寫入 last100.txt")
+        print("[✅] last100.txt 寫入完成")
 
     except Exception as e:
-        print(f"[❌] 發生錯誤: {e}")
+        print(f"[❌] 錯誤: {e}")
 
 if __name__ == "__main__":
     fetch_539_latest_100()
