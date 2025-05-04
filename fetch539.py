@@ -25,7 +25,7 @@ def fetch_539_latest_100():
                 output_lines.append(f"{draw_id} {weekday} {weekname} {' '.join(nums)}")
 
         output = "\n".join(output_lines[:100])
-        with open("last100.txt", "w", encoding="utf-8") as f:
+        with open("./last100.txt", "w", encoding="utf-8") as f:
             f.write(output)
 
         print("[✅] Successfully wrote latest 100 draws to last100.txt")
