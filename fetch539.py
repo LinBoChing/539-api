@@ -7,7 +7,10 @@ def fetch_539_latest_100():
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
         url = "https://2019.biga.com.tw/SERVICE/539%E9%96%8B%E7%8D%8E%E5%96%AE%E7%AC%AC1%E9%A0%81"
-        response = requests.get(url)
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+        }
+        response = requests.get(url, headers=headers)
         response.encoding = 'utf-8'
         soup = BeautifulSoup(response.text, "html.parser")
 
