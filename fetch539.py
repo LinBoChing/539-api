@@ -1,41 +1,46 @@
+import requests
 from bs4 import BeautifulSoup
-import re
 
-# 打開本地HTML檔
-with open('debug.html', 'r', encoding='utf-8') as file:
-    soup = BeautifulSoup(file, 'html.parser')
+def fetch_539_latest_100():
+    try:
+        url = "https://2019.biga.com.tw/SERVICE/539%E9%96%8B%E7%8D%8E%E5%96%AE%E7%AC%AC1%E9%A0%81"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+            "Referer": "https://2019.biga.com.tw/"
+        }
 
-data = []
+        response = requests.get(url, headers=headers)
+        response.encoding = 'utf-8'
+        html = response.text
 
-# 抓取所有表格資料列
-trs = soup.find_all('tr')[1:]  # 跳過標題列
+        # 儲存原始頁面方便 debug
+        with open("debug.html", "w", encoding="utf-8") as debug_file:
+            debug_file.write(html)
 
-for tr in trs:
-    tds = tr.find_all('td')
-    if len(tds) != 12:
-        continue
+        soup = BeautifulSoup(html, "html.parser")
+        rows = soup.find_all("tr")
 
-    for i in [0, 6]:  # 每列兩期，左一組，右一組
-        period = tds[i].text.strip()
-        date_raw = tds[i+1].text.strip()
-        weekday = tds[i+2].text.strip()
-        numbers = [tds[i+3].text.strip(), tds[i+4].text.strip(), tds[i+5].text.strip(), tds[i+6].text.strip(), tds[i+7].text.strip()]
+        output_lines = []
+        for row in rows:
+            cols = row.find_all("div", class_="xno")
+            if len(cols) == 8:
+                date = cols[0].text.strip()
+                weekday = cols[1].text.strip()
+                draw = cols[2].text.strip()
+                nums = [col.text.strip() for col in cols[3:]]
+                line = f"{draw} {date} {weekday} {' '.join(nums)}"
+                output_lines.append(line)
 
-        # 處理日期格式：2025年05月04日 ➜ 2025/05/04
-        match = re.search(r'(\\d{4})年(\\d{2})月(\\d{2})日', date_raw)
-        if match:
-            formatted_date = f"{match.group(1)}/{match.group(2)}/{match.group(3)}"
-        else:
-            continue  # 日期格式錯誤跳過
+        if not output_lines:
+            raise Exception("⚠️ 沒有抓到任何有效期數，可能是網站改版或被擋下來。")
 
-        line = f"{period},{formatted_date},{weekday}," + ",".join(numbers)
-        data.append(line)
+        with open("last100.txt", "w", encoding="utf-8") as f:
+            f.write("\n".join(output_lines[:100]))
 
-# 只取最新的100筆（從最新的往上推）
-data = data[:100]
+        print("[✅] 成功寫入 last100.txt，共", len(output_lines), "筆")
+        
+    except Exception as e:
+        print(f"[❌] 發生錯誤: {e}")
 
-# 寫入 last100.txt
-with open('last100.txt', 'w', encoding='utf-8') as f:
-    f.write("\n".join(data))
-
-print("✅ 擷取完成，已寫入 last100.txt，共", len(data), "筆資料")
+if __name__ == "__main__":
+    fetch_539_latest_100()
